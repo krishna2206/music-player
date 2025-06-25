@@ -1,0 +1,46 @@
+{
+  "common": {
+    "home": "Home",
+    "demo": "Demo",
+    "search": "Search",
+    "library": "Library",
+    "settings": "Settings",
+    "hello": "Hello Expo !",
+    "notFound": "This screen doesn't exist.",
+    "goHome": "Go to home screen!"
+  },
+  "onboarding": {
+    "welcome": "Welcome to Music Player",
+    "subtitle": "Discover amazing music with our beautiful interface",
+    "feature1Title": "🎵 Rich Music Library",
+    "feature1Description": "Access thousands of songs with high-quality audio",
+    "feature2Title": "🎨 Beautiful Themes", 
+    "feature2Description": "Switch between light and dark themes seamlessly",
+    "feature3Title": "🌍 Multi-language Support",
+    "feature3Description": "Available in multiple languages",
+    "getStarted": "Get Started"
+  },
+  "home": {
+    "subtitle": "This is a quickstart Expo project with tabs navigation and theme support."
+  },
+  "demo": {
+    "title": "Components demo",
+    "subtitle": "This page show how does the components look",
+    "cardTitle": "This demonstrates the power of semantic color names:",
+    "itemText": "Item #{{number}} - This content will scroll under the tab bar"
+  },
+  "settings": {
+    "themeSettings": "Theme Settings",
+    "lightTheme": "Light Theme",
+    "darkTheme": "Dark Theme",
+    "systemDefault": "System Default",
+    "currentTheme": "Current theme: {{theme}}",
+    "languageSettings": "Language Settings",
+    "english": "English",
+    "french": "French",
+    "systemLanguage": "System Language",
+    "currentLanguage": "Current language: {{language}}",
+    "languageSource": "Language source: {{source}}",
+    "resetOnboarding": "Reset Onboarding"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "common": {
+    "home": "Accueil",
+    "demo": "Démo",
+    "tracks": "Musiques",
+    "search": "Recherche",
+    "library": "Bibliothèque",
+    "settings": "Paramètres",
+    "hello": "Bonjour Expo !",
+    "notFound": "Cette page n'existe pas.",
+    "goHome": "Aller à l'accueil !"
+  },
+  "onboarding": {
+    "welcome": "BIENVENUE\nSUR MUSIC PLAYER",
+    "subtitle": "Commence par mettre en place ta bibliothèque",
+    "feature1Title": "🎵 Riche Bibliothèque Musicale",
+    "feature1Description": "Accédez à des milliers de chansons avec un son de haute qualité",
+    "feature2Title": "🎨 Beaux Thèmes",
+    "feature2Description": "Basculez entre les thèmes clairs et sombres en toute transparence",
+    "feature3Title": "🌍 Support Multi-langues",
+    "feature3Description": "Disponible en plusieurs langues",
+    "getStarted": "Commencer",
+    "connectTitle": "Importe tes musiques",
+    "connectSubtitle": "Connecte-toi à ton compte pour accéder à tes playlists et chansons",
+    "connectApple": "Se connecter avec Apple",
+    "connectGoogle": "Se connecter avec Google",
+    "goOffline": "Continuer hors ligne"
+  },
+  "home": {
+    "subtitle": "Il s'agit d'un projet Expo de démarrage rapide avec navigation par onglets et support de thème."
+  },
+  "settings": {
+    "themeSettings": "Paramètres de thème",
+    "lightTheme": "Thème clair",
+    "darkTheme": "Thème sombre",
+    "systemDefault": "Par défaut du système",
+    "currentTheme": "Thème actuel : {{theme}}",
+    "languageSettings": "Paramètres de langue",
+    "english": "Anglais",
+    "french": "Français",
+    "systemLanguage": "Langue du système",
+    "currentLanguage": "Langue actuelle : {{language}}",
+    "languageSource": "Source de la langue : {{source}}",
+    "resetOnboarding": "Réinitialiser l'onboarding",
+    "clearAppData": "Supprimer les données de l'application",
+    "logout": "Se déconnecter"
+  }
+}
