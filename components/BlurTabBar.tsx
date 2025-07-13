@@ -52,7 +52,7 @@ export function BlurTabBar({ state, navigation }: BottomTabBarProps) {
   // Use BlurView on iOS for blur effect, ThemedView on Android for opaque background
   const TabBarBackground = Platform.OS === 'ios' ? BlurView : ThemedView;
   const backgroundProps = Platform.OS === 'ios'
-    ? { intensity: 50, tint: (theme === 'dark' ? 'dark' : 'light') as 'light' | 'dark' }
+    ? { intensity: 80, tint: (theme === 'dark' ? 'dark' : 'light') as 'light' | 'dark' }
     : {};
 
   return (

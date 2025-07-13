@@ -21,7 +21,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     supportsTablet: true,
     bundleIdentifier: "mg.krishna.musicplayer",
-    appleTeamId: "JY5BRV4N92"
+    appleTeamId: "JY5BRV4N92",
+    infoPlist: {
+      UIBackgroundModes: [
+        "audio"
+      ]
+    }
   },
   android: {
     adaptiveIcon: {
@@ -44,7 +49,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       {
         iosUrlScheme: process.env.EXPO_PUBLIC_IOS_URL_SCHEME
       }
-    ]
+    ],
+    "expo-audio"
   ],
   experiments: {
     typedRoutes: true

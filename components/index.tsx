@@ -1,6 +1,8 @@
 export { BlurTabBar } from './BlurTabBar';
 export { CustomHeader } from './CustomHeader';
 export { FadeInAnimated } from './FadeInAnimated';
+export { FloatingMusicPlayer } from './FloatingMusicPlayer';
+export { IconButton } from './IconButton';
 export { IconOnlyTabBar } from './IconOnlyTabBar';
 export { LoadingSpinner } from './LoadingSpinner';
 export { ThemedButton } from './ThemedButton';

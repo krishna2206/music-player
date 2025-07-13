@@ -27,7 +27,7 @@ export interface Artist {
   }
   
   export interface Track {
-    id?: string;
+    id: string;
     user_id?: string;
     file_name: string;
     file_path: string;

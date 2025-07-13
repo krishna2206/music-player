@@ -1,148 +1,75 @@
-import { CustomHeader, FadeInAnimated, LoadingSpinner, ThemedText, ThemedView, TrackCard } from '@/components';
-import type { HeaderAction } from '@/components/CustomHeader';
-import { useTranslation } from '@/hooks/useTranslation';
-import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
 import { router } from "expo-router";
 import { GearSix, Plus, SortAscending } from 'phosphor-react-native';
-import React, { useEffect, useState } from 'react';
-import { Alert, ScrollView, View } from 'react-native';
-import { getPictureAsDataURL, readAudioFile } from 'taglib-ts';
+import React, { useState } from 'react';
+import { ActivityIndicator, Alert, Modal, ScrollView, View } from 'react-native';
+
+import { CustomHeader, FadeInAnimated, ThemedText, ThemedView, TrackCard } from '@/components';
+import type { HeaderAction } from '@/components/CustomHeader';
+import useMusicPlayer from '@/hooks/useMusicPlayer';
+import { useThemeColors } from '@/hooks/useThemeColors';
+import { useTracks } from '@/hooks/useTracks';
+import { useTranslation } from '@/hooks/useTranslation';
+import { ImportResult, trackService } from '@/services/trackService';
 import { Track } from '../../types/music';
 
 export default function TracksScreen() {
   const { t } = useTranslation();
-  const [tracks, setTracks] = useState<Track[]>([]);
-  const [loading, setLoading] = useState(false);
+  const colors = useThemeColors();
+  const { tracks } = useTracks();
+  const { playTrack } = useMusicPlayer();
 
-  const extractMetadata = async (filePath: string): Promise<Partial<Track>> => {
+  const [isImporting, setIsImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState({ current: 0, total: 0 });
+
+  const handleTrackClick = async (track: Track) => {
     try {
-      const fileRef = await readAudioFile(filePath);
-
-      if (fileRef.isValid()) {
-        const tag = fileRef.tag();
-        const audioProps = fileRef.audioProperties();
-        const pictures = tag?.pictures() || [];
-
-        return {
-          title: tag?.title() || undefined,
-          artist: tag?.artist() || undefined,
-          album: tag?.album() || undefined,
-          year: tag?.year() || undefined,
-          track_number: tag?.track() || undefined,
-          genre: tag?.genre() || undefined,
-          duration: audioProps?.lengthInSeconds() || undefined,
-          cover_image: pictures.length > 0 ? getPictureAsDataURL(pictures[0]) : undefined,
-        };
-      }
+      await playTrack(track, tracks);
     } catch (error) {
-      console.error('Error extracting metadata:', error);
-    }
-
-    return {};
-  };
-
-  const loadMusicFiles = async () => {
-    try {
-      setLoading(true);
-      const musicDir = FileSystem.documentDirectory + 'music/';
-      const dirInfo = await FileSystem.getInfoAsync(musicDir);
-
-      if (dirInfo.exists) {
-        const files = await FileSystem.readDirectoryAsync(musicDir);
-        const tracksWithMetadata: Track[] = [];
-
-        for (const fileName of files) {
-          const filePath = musicDir + fileName;
-          const metadata = await extractMetadata(filePath);
-
-          tracksWithMetadata.push({
-            file_name: fileName,
-            file_path: filePath,
-            ...metadata,
-          });
-        }
-
-        setTracks(tracksWithMetadata);
-      }
-    } catch (error) {
-      console.error('Error loading music files:', error);
-    } finally {
-      setLoading(false);
+      console.error('Error playing track:', error);
+      Alert.alert('Error', 'Failed to play track');
     }
   };
 
-  useEffect(() => {
-    const loadFiles = async () => {
-      try {
-        setLoading(true);
-        const musicDir = FileSystem.documentDirectory + 'music/';
-        const dirInfo = await FileSystem.getInfoAsync(musicDir);
-
-        if (dirInfo.exists) {
-          const files = await FileSystem.readDirectoryAsync(musicDir);
-          const tracksWithMetadata: Track[] = [];
-
-          for (const fileName of files) {
-            const filePath = musicDir + fileName;
-            const metadata = await extractMetadata(filePath);
-
-            tracksWithMetadata.push({
-              file_name: fileName,
-              file_path: filePath,
-              ...metadata,
-            });
-          }
-
-          setTracks(tracksWithMetadata);
-        }
-      } catch (error) {
-        console.error('Error loading music files:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadFiles();
-  }, []);
+  const showImportResult = (result: ImportResult) => {
+    if (result.failed.length > 0) {
+      Alert.alert(
+        'Import Completed',
+        `${result.imported.length} tracks imported successfully.\n${result.failed.length} tracks failed to import.`
+      );
+    } else if (result.duplicates.length > 0) {
+      Alert.alert(
+        'Import Completed',
+        `${result.imported.length} new tracks imported.\n${result.duplicates.length} duplicates were skipped.`
+      );
+    } else {
+      Alert.alert('Success', 'All music files imported successfully!');
+    }
+  };
 
   const importMusicFile = async () => {
     try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: 'audio/*',
-        copyToCacheDirectory: true,
-        multiple: true,
-      });
+      const files = await trackService.openFilePicker();
+      if (!files) return;
 
-      if (!result.canceled) {
-        for (const file of result.assets) {
-          // Create a directory for music files if it doesn't exist
-          const musicDir = FileSystem.documentDirectory + 'music/';
-          const dirInfo = await FileSystem.getInfoAsync(musicDir);
+      setIsImporting(true);
+      setImportProgress({ current: 0, total: files.length });
 
-          if (!dirInfo.exists) {
-            await FileSystem.makeDirectoryAsync(musicDir, { intermediates: true });
-          }
-
-          // Copy file to app's document directory
-          const fileName = file.name || `track_${Date.now()}.mp3`;
-          const destinationPath = musicDir + fileName;
-
-          await FileSystem.copyAsync({
-            from: file.uri,
-            to: destinationPath,
-          });
-
-          console.log(`Imported: ${fileName} to ${destinationPath}`);
+      const importResult = await trackService.importTracks(
+        files,
+        (current, total) => {
+          setImportProgress({ current, total });
         }
+      );
 
-        Alert.alert('Success', 'Music files imported successfully!');
-        // Reload the music files list
-        loadMusicFiles();
-      }
+      showImportResult(importResult);
     } catch (error) {
-      console.error('Error importing music file:', error);
-      Alert.alert('Error', 'Failed to import music file');
+      console.error('Error during import:', error);
+      Alert.alert('Error', 'An error occurred during import');
+    } finally {
+      setIsImporting(false);
+      setTimeout(() => {
+        setImportProgress({ current: 0, total: 0 });
+      }, 300);
     }
   };
 
@@ -164,25 +91,52 @@ export default function TracksScreen() {
     }
   ];
 
-  if (loading) {
-    return (
-      <>
-        <CustomHeader
-          title={t('common.tracks')}
-          actions={headerActions}
-        />
-        <LoadingSpinner usedInTabScreen={true} />
-      </>
-    )
-  }
+  const renderLoadingModal = () => (
+    <Modal
+      visible={isImporting}
+      transparent={true}
+      animationType="fade"
+    >
+      <View className="flex-1 justify-center items-center">
+        <ThemedView className="bg-surface p-6 rounded-xl items-center min-w-[300px] border border-border/50">
+          <ActivityIndicator size="large" color={colors.primary} />
+          <ThemedText className="mt-4 text-center font-medium">
+            Importing tracks...
+          </ThemedText>
+          <ThemedText className="mt-2 text-center text-sm">
+            {importProgress.current} of {importProgress.total}
+          </ThemedText>
+        </ThemedView>
+      </View>
+    </Modal>
+  );
 
-  else if (tracks.length === 0) {
-    return (
+  const renderEmptyState = () => (
+    <View className="flex-1 justify-center items-center p-4">
       <ThemedText className="text-center text-lg text-gray-500">
         No tracks imported yet. Tap the + button to add music files.
       </ThemedText>
-    )
-  }
+    </View>
+  );
+
+  const renderTracksList = () => (
+    <ScrollView className="flex-1 p-4">
+      <FadeInAnimated duration={300}>
+        <View className="space-y-2">
+          <View className="flex-row flex-wrap justify-between">
+            {tracks.map((track) => (
+              <TrackCard
+                key={track.id}
+                track={track}
+                onPress={() => handleTrackClick(track)}
+              />
+            ))}
+          </View>
+          <View style={{ height: 100 }} />
+        </View>
+      </FadeInAnimated>
+    </ScrollView>
+  );
 
   return (
     <ThemedView className="flex-1">
@@ -191,21 +145,9 @@ export default function TracksScreen() {
         actions={headerActions}
       />
 
-      <ScrollView className="flex-1 p-4">
-        <FadeInAnimated duration={300}>
-          <View className="space-y-2">
-            <View className="flex-row flex-wrap justify-between">
-              {tracks.map((track, index) => (
-                <TrackCard
-                  key={index}
-                  track={track}
-                  onPress={() => console.log('Play:', track.title)}
-                />
-              ))}
-            </View>
-          </View>
-        </FadeInAnimated>
-      </ScrollView>
+      {renderLoadingModal()}
+
+      {tracks.length === 0 ? renderEmptyState() : renderTracksList()}
     </ThemedView>
   );
 }
